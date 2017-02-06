@@ -169,7 +169,7 @@ def report_results(request):
             for fail in failures:
                 fail.times_failed = 0
                 fail.save()
-            phases = Phase.objects.filter(groups=sub.group).order_by('ordering')
+            phases = Phase.objects.filter(group=sub.group).order_by('ordering')
             for phase in phases:
                 if phase.ordering > sub.phase.ordering:
                     sub.phase = phase

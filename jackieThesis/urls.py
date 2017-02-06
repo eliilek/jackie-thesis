@@ -25,7 +25,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls, name="admin"),
     url(r'^trial', experiments.views.trial, name='trial'),
     url(r'^myself', experiments.views.myself, name='myself'),
-    url(r'^results/(?P<subid>[0-9]+)/$', experiments.views.index_results, name='index_results'),
-    url(r'^view_results', experiments.views.results, name='results'),
+    url(r'^results', experiments.views.index_results, name='index_results'),
+    url(r'^view_results/(?P<subid>[0-9]+)/$', experiments.views.results, name='results'),
     url(r'^report_results', experiments.views.report_results, name='report_results'),
 ]
