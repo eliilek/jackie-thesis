@@ -1,12 +1,9 @@
-beautifulsoup4==4.5.1
 dj-database-url==0.4.0
 Django==1.10
 django-extensions==1.7.1
-docopt==0.6.2
 Pillow==3.4.2
 pipreqs==0.4.3
 psycopg2==2.6.2
-pygame==1.9.1
 requests==2.9.1
 six==1.10.0
 virtualenv==14.0.6
