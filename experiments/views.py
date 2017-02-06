@@ -150,7 +150,6 @@ def report_results(request):
         return HttpResponse("You have reached this page in error. If you want to begin a trial, return to the subject view page.")
     block = ""
     json_object = json.loads(request.body)
-    print json_object
     if len(json_object) < int(json_object['trial_length']) + 1:
         try:
             db_response = Response.objects.get(id=json_object[0].response_id)
@@ -170,7 +169,6 @@ def report_results(request):
         except:
             pass
 
-    print block
     if block != "":
         if block.successful() == "Passed":
             sub = block.subject

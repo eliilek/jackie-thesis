@@ -12,6 +12,7 @@
     var responses = {};
     var complete = false;
     var instructions = '{{instructions}}'
+    var first = true;
 
     function getCookie(name) {
         var cookieValue = null;
@@ -47,7 +48,7 @@
       var form = $(document.createElement('form'));
       form.attr("method", "GET");
       form.attr("action", "{% url 'myself' %}");
-      form.append('<input type="submit" value="Results"/>');
+      form.append('<input type="submit" value="Next"/>');
       $("#background").append(form);
     }
 
@@ -126,7 +127,7 @@
     function refresh(){
       $("#stimulus").html(trial[index]["stimulus"]["symbol_text"]);
       $("#stimulus").css('font-family', trial[index]["stimulus"]["font_family"]);
-      if ("{{feedback}}" == "False"){
+      if ("{{feedback}}" == "False" && first == false){
       $("#background").on('click', function(evt){
         evt.preventDefault();
         evt.stopPropagation();
@@ -148,6 +149,7 @@
         }
       });}
       else {
+        first = false;
         $("#background").off('click');
         $("#left_option").html(trial[index]["left"]["symbol_text"]);
         $("#left_option").css('font-family', trial[index]["left"]["font_family"]);
