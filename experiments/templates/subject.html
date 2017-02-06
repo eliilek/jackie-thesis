@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+  </head>
+  <body>
+    <p>
+      Subject: {{ subject.subject_id }}<br>
+      Group: {{ subject.group }}<br>
+      Current Phase: {{ subject.phase }}
+    </p>
+    <br>
+    {% if not admin %}
+    <form action="{% url 'trial' %}">
+      <input type="submit" value="Begin Trial" />
+      <input type="hidden" name="subject" value="{{ subject }}" />
+    </form>
+    {% endif %}
+  </body>
+</html>

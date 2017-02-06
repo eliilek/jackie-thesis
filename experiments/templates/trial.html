@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+
+    <link rel="stylesheet" type="text/css" href="{% static '/experiments/style.css' %}" />
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    <script type="text/javascript">
+    var timer_start;
+    var index = 0;
+    var trial = JSON.parse('{{ trial }}');
+    var responses = {};
+    var complete = false;
+    var instructions = "This program will present many trials; each trial will present you with four symbols. One will be in the center of the screen, with three others below it. Click the mouse over any of the three symbols you think “goes with” the center sample item. Good luck!"
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie != '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    var csrftoken = getCookie('csrftoken');
+
+    function post(path, parameters){
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", path, true);
+      xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+      xhr.setRequestHeader('X-CSRFToken', csrftoken);
+      complete = true;
+      xhr.send(JSON.stringify(parameters));
+    }
+
+    function processResponse(response){
+      timer_end = Date.now();
+      var response_option;
+      if (response.id == trial[index]["option_1"]){
+        response_option = 1;
+      } else if (response.id == trial[index]["option_2"]){
+        response_option = 2;
+      } else {
+        response_option = 3;
+      }
+      responses[index] = {response_id:trial[index]["response_id"], given_response:response_option, response_time:timer_end-timer_start};
+      $("#stimulus").html('');
+      $("#left_option").html('');
+      $("#left_option").off();
+      $("#center_option").html('');
+      $("#center_option").off();
+      $("#right_option").html('');
+      $("#right_option").off();
+      if ("{{feedback}}" == "True"){
+        delay = false;
+        console.log("given: " + response_option.toString() + " correct: " + trial[index].correct_response.toString());
+        if (response_option == trial[index].correct_response){
+          $("#stimulus").append($('<img>',{src:"http://openclipart.org/download/215675/five_pointed_star.svg"}));
+          $("#left_option").append($('<img>',{src:"http://openclipart.org/download/215675/five_pointed_star.svg"}));
+          $("#center_option").append($('<img>',{src:"http://openclipart.org/download/215675/five_pointed_star.svg"}));
+          $("#right_option").append($('<img>',{src:"http://openclipart.org/download/215675/five_pointed_star.svg"}));
+        } else {
+          $("#stimulus").css('background', 'grey');
+          $("#left_option").css('background', 'grey');
+          $("#center_option").css('background', 'grey');
+          $("#right_option").css('background', 'grey');
+        }
+
+        $("#background").on('click', function(evt){
+          evt.preventDefault();
+          evt.stopPropagation();
+          if (delay){
+            $("#background").off();
+            $("#stimulus img").last().remove();
+            $("#stimulus").css('background', 'white');
+            $("#left_option img").last().remove();
+            $("#left_option").css('background', 'white');
+            $("#center_option img").last().remove();
+            $("#center_option").css('background', 'white');
+            $("#right_option img").last().remove();
+            $("#right_option").css('background', 'white');
+            proceed();
+        } else {
+          delay = true;
+        }
+      });
+
+    } else {
+      proceed();
+    }}
+
+    function proceed(){
+      index++;
+      if (index >= trial.length){
+        responses['trial_length'] = trial.length;
+        post("{% url 'report_results' %}", responses);
+        $("#background").html("Insert Debriefing Instructions Here");
+        var form = $(document.createElement('form'));
+        form.attr("method", "GET");
+        form.attr("action", "{% url 'myself' %}");
+        form.append('<input type="submit" value="Results"/>');
+        $("#background").append(form);
+        return 0;
+      } else {
+        refresh();
+      }
+    }
+
+    var delay = false;
+
+    function refresh(){
+      $("#stimulus").html(trial[index]["stimulus"]["symbol_text"]);
+      $("#stimulus").css('font-family', trial[index]["stimulus"]["font_family"]);
+      if ("{{feedback}}" == "False"){
+      $("#background").on('click', function(evt){
+        evt.preventDefault();
+        evt.stopPropagation();
+        if (delay){
+          delay = false;
+          $("#background").off('click');
+          $("#left_option").html(trial[index]["left"]["symbol_text"]);
+          $("#left_option").css('font-family', trial[index]["left"]["font_family"]);
+          $("#center_option").html(trial[index]["center"]["symbol_text"]);
+          $("#center_option").css('font-family', trial[index]["center"]["font_family"]);
+          $("#right_option").html(trial[index]["right"]["symbol_text"]);
+          $("#right_option").css('font-family', trial[index]["right"]["font_family"]);
+          $("#left_option").click(function(){processResponse(trial[index]["left"])});
+          $("#center_option").click(function(){processResponse(trial[index]["center"])});
+          $("#right_option").click(function(){processResponse(trial[index]["right"])});
+          timer_start = Date.now();
+        } else {
+          delay = true;
+        }
+      });}
+      else {
+        $("#background").off('click');
+        $("#left_option").html(trial[index]["left"]["symbol_text"]);
+        $("#left_option").css('font-family', trial[index]["left"]["font_family"]);
+        $("#center_option").html(trial[index]["center"]["symbol_text"]);
+        $("#center_option").css('font-family', trial[index]["center"]["font_family"]);
+        $("#right_option").html(trial[index]["right"]["symbol_text"]);
+        $("#right_option").css('font-family', trial[index]["right"]["font_family"]);
+        $("#left_option").click(function(){processResponse(trial[index]["left"])});
+        $("#center_option").click(function(){processResponse(trial[index]["center"])});
+        $("#right_option").click(function(){processResponse(trial[index]["right"])});
+        timer_start = Date.now();
+      }
+    }
+
+    $(document).ready(function(){
+      alert(instructions);
+      refresh();
+    });
+
+    $(window).bind(
+      "beforeunload",
+      function(){
+        if (complete == false){
+          if (responses.length == 0){
+            responses[index] = {response_id: trial[index]["response_id"]}
+          }
+          responses['trial_length'] = trial.length;
+          post("{% url 'report_results' %}", responses);
+        }
+      }
+    )
+    </script>
+  </head>
+  <body>
+    <div id="background">
+      <div id="stimulus">
+      </div>
+
+      <div class="option" id="left_option">
+      </div>
+      <div class="option" id="center_option">
+      </div>
+      <div class="option" id="right_option">
+      </div>
+    </div>
+  </body>
+</html>

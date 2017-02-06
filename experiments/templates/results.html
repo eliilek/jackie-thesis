@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'experiments/style.css' %}">
+  </head>
+  <body>
+    <div>
+      <h3>Subject ID: {{ sub.subject_id }}</h3>
+    </div><br /><br />
+    {% if responses %}
+    <div>
+      <table>
+        <tr>
+          <th colspan=6>{{task}} Responses:</th>
+        </tr>
+        <tr>
+          <th>Date Recorded</th>
+          <th>Phase</th>
+          <th>Stimulus</th>
+          <th>Correct Response</th>
+          <th>Given Response</th>
+          <th>Response Latency</th>
+        </tr>
+        {% for response in responses %}
+        <tr>
+          <td>{{ response.time }}</td>
+          <td>{{ response.phase }}</td>
+          <td style="font-family:'{{response.stimulus.font_family}}'">{{ response.stimulus.symbol_text }}</td>
+          <td style="font-family:'{{response.correct.font_family}}'">{{ response.correct.symbol_text }}</td>
+          <td style="font-family:'{{response.given.font_family}}'">{{ response.given.symbol_text }}</td>
+          <td>{{ response.response_time }}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div><br /><br />
+    {% endif %}
+  </body>
+</html>

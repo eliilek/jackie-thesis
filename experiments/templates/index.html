@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      function clicked(e){
+        var temp_arr = {{ used_ids }};
+        if({{ used_ids }}.indexOf(parseInt(document.getElementById('subid').value)) == -1){
+          if(!confirm('This will create a new user. Are you sure you want to proceed?')){
+            e.preventDefault();
+          }
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <form action="{% url 'session' %}" method="post">
+      {% csrf_token %}
+      Subject ID:<br>
+      <input type="number" name="subid" id="subid" /><br>
+      {% if view_results %}
+      <input type="submit" name="Action" value="View Results"/>
+      {% else %}
+      <input type="submit" name="Action" value="Start Session" />
+      {% endif %}
+    </form>
+  </body>
+</html>

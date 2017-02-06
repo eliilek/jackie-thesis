@@ -13,9 +13,19 @@ Including another URLconf
     1. Import the include() function: from django.conf.urls import url, include
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
-from django.conf.urls import url
+from django.conf.urls import include, url
 from django.contrib import admin
+admin.autodiscover()
+
+import experiments.views
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^$', experiments.views.index, name="index"),
+    url(r'^session', experiments.views.session, name='session'),
+    url(r'^admin/', admin.site.urls, name="admin"),
+    url(r'^trial', experiments.views.trial, name='trial'),
+    url(r'^myself', experiments.views.myself, name='myself'),
+    url(r'^results/(?P<subid>[0-9]+)/$', experiments.views.index_results, name='index_results'),
+    url(r'^view_results', experiments.views.results, name='results'),
+    url(r'^report_results', experiments.views.report_results, name='report_results'),
 ]
