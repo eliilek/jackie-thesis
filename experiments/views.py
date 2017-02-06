@@ -68,7 +68,7 @@ def session(request):
                 return redirect('myself')
             return redirect('results', request.POST['subid'])
         except:
-            return redirect('/adminexperiments/subject/add')
+            return redirect('/admin/experiments/subject/add')
     else:
         if 'user' in request.session:
             try:
