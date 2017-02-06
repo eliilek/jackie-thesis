@@ -11,7 +11,7 @@
     var trial = JSON.parse('{{ trial }}');
     var responses = {};
     var complete = false;
-    var instructions = "This program will present many trials; each trial will present you with four symbols. One will be in the center of the screen, with three others below it. Click the mouse over any of the three symbols you think “goes with” the center sample item. Good luck!"
+    var instructions = '{{instructions}}'
 
     function getCookie(name) {
         var cookieValue = null;
@@ -35,8 +35,20 @@
       xhr.open("POST", path, true);
       xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
       xhr.setRequestHeader('X-CSRFToken', csrftoken);
+      xhr.addEventListener("load", read_response);
       complete = true;
       xhr.send(JSON.stringify(parameters));
+    }
+
+    var send_resolved = false;
+    function read_response(){
+      send_resolved = true;
+      $("#background").html(this.responseText);
+      var form = $(document.createElement('form'));
+      form.attr("method", "GET");
+      form.attr("action", "{% url 'myself' %}");
+      form.append('<input type="submit" value="Results"/>');
+      $("#background").append(form);
     }
 
     function processResponse(response){
@@ -100,12 +112,9 @@
       if (index >= trial.length){
         responses['trial_length'] = trial.length;
         post("{% url 'report_results' %}", responses);
-        $("#background").html("Insert Debriefing Instructions Here");
-        var form = $(document.createElement('form'));
-        form.attr("method", "GET");
-        form.attr("action", "{% url 'myself' %}");
-        form.append('<input type="submit" value="Results"/>');
-        $("#background").append(form);
+        if (!send_resolved){
+          $("#background").html("Processing results...");
+        }
         return 0;
       } else {
         refresh();

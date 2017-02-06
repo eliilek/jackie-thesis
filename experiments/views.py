@@ -136,13 +136,21 @@ def trial(request):
     session_length.trials += 1
     session_length.save()
 
-    return render(request, 'trial.html', {'trial': mark_safe(json.dumps(trial)), 'feedback': sub.phase.feedback})
+    if sub.phase.id == 4:
+        instructions = "In your next session, there never will be any stars or greyed out symbols. The computer still will record whether your choice is correct or not. Good Luck!"
+    elif sub.phase.id == 8:
+        instructions = 'This program will present many trials; each trial will present you with four symbols. One will be in the center of the screen, with three others below it. Click the mouse over any of the three symbols you think goes with the center sample item. Good luck!'
+    else:
+        instructions = 'This program will present many trials; each trial will present you with four symbols. One will be in the center of the screen, with three others below it. Click the mouse over any of the three symbols you think goes with the center sample item. After your selection one of two things will occur: (1) stars will appear on the screen or (2) the symbols will be greyed out. If stars appear on the screen this means you have selected the correct response. If the symbols are greyed out this means you have selected incorrectly. Good luck!'
+
+    return render(request, 'trial.html', {'trial': mark_safe(json.dumps(trial)), 'feedback': sub.phase.feedback, 'instructions': instructions})
 
 def report_results(request):
     if request.method != "POST":
         return HttpResponse("You have reached this page in error. If you want to begin a trial, return to the subject view page.")
     block = ""
     json_object = json.loads(request.body)
+    print json_object
     if len(json_object) < int(json_object['trial_length']) + 1:
         try:
             db_response = Response.objects.get(id=json_object[0].response_id)
@@ -162,6 +170,7 @@ def report_results(request):
         except:
             pass
 
+    print block
     if block != "":
         if block.successful() == "Passed":
             sub = block.subject
@@ -172,12 +181,13 @@ def report_results(request):
             phases = Phase.objects.filter(group=sub.group).order_by('ordering')
             for phase in phases:
                 if phase.ordering > sub.phase.ordering:
+                    old_phase = sub.phase
                     sub.phase = phase
                     sub.save()
-                    return redirect("myself")
+                    return HttpResponse("You have passed Phase %s! You may now continue on to Phase %s when you are ready." % (old_phase.phase_num, sub.phase.phase_num))
             sub.active = False
             sub.save()
-            return redirect("index")
+            return HttpResponse("Thank you for your participation! You will receive an email with further information by tomorrow evening.")
         else:
             sub = block.subject
             if sub.phase.fail_limit > 0:
@@ -192,9 +202,10 @@ def report_results(request):
                 if fail.times_failed >= sub.phase.disable_fail_limit:
                     sub.active = False
                     sub.save()
-                    return redirect("index")
-                if fail.times_failed == sub.phase.disable_fail_limit/sub.phase.fail_limit:
+                    return HttpResponse("Thank you for your participation! You will receive an email with further information by tomorrow evening.")
+                elif fail.times_failed == sub.phase.disable_fail_limit/sub.phase.fail_limit:
+                    old_phase = sub.phase
                     sub.phase = sub.phase.fail_phase
                     sub.save()
-
-    return redirect("/myself")
+                    return HttpResponse("You have not yet mastered Phase %s. You may return to Phase %s when you are ready for further training." % (old_phase.phase_num, sub.phase.phase_num))
+            return HttpResponse("You have not yet mastered Phase %s. You may try again whenever you are ready." % sub.phase.phase_num)
