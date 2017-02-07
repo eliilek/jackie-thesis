@@ -127,7 +127,7 @@
     function refresh(){
       $("#stimulus").html(trial[index]["stimulus"]["symbol_text"]);
       $("#stimulus").css('font-family', trial[index]["stimulus"]["font_family"]);
-      if ("{{feedback}}" == "False" && first == false){
+      if (first == false){
       $("#background").on('click', function(evt){
         evt.preventDefault();
         evt.stopPropagation();
