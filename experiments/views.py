@@ -64,10 +64,10 @@ def session(request):
     if request.method == "POST":
         try:
             existing_user = Subject.objects.get(pk=request.POST['subid'])
+            request.session['user'] = request.POST['subid']
             if request.POST['Action'] == "Start Session":
                 if existing_user.active == False:
                     return HttpResponse("This user is no longer valid to use for trials")
-                request.session['user'] = request.POST['subid']
                 new_session_length = SessionLength(subject=existing_user, trials=0)
                 new_session_length.save()
                 request.session['session_length'] = new_session_length.pk
