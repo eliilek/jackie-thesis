@@ -22,6 +22,12 @@ def index_results(request):
     return render(request, 'index.html', {"view_results":True})
 
 def results(request, subid):
+    if request.method == "POST":
+        try:
+            existing_user = Subject.objects.get(pk=request.POST['subid'])
+            request.session['user'] = request.POST['subid']
+        except:
+            return redirect('/admin/experiments/subject/add')
     try:
         sub = Subject.objects.get(pk=request.session['user'])
     except:
